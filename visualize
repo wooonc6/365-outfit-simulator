@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>365 수학적 코디 시뮬레이터</title>
+    <style>
+        body { font-family: 'Malgun Gothic', sans-serif; background: #f5f6fa; padding: 20px; color: #333; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #2c3e50; }
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 20px; }
+        .card { background: #edf2f7; padding: 15px; border-radius: 10px; }
+        .card h3 { margin-top: 0; color: #34495e; border-bottom: 2px solid #cbd5e0; padding-bottom: 5px; }
+        .btn-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        button { padding: 8px 12px; border: none; background: white; border-radius: 5px; cursor: pointer; font-weight: bold; transition: all 0.2s; border: 1px solid #cbd5e0; }
+        button.active { background: #3182ce; color: white; border-color: #3182ce; }
+        .result-box { margin-top: 30px; background: #2d3748; color: white; padding: 20px; border-radius: 10px; text-align: center; }
+        .result-val { font-size: 2rem; font-weight: bold; color: #63b3ed; }
+        .matrix-info { font-size: 0.9rem; color: #a0aec0; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>70억 가지(?) 조합을 향한 4차원 코디 시뮬레이터</h1>
+    <p style="text-align:center; color:#718096;">보내준 데이터(상의 4색, 하의 4색 기저) 기반으로 클릭 시 차원이 확장되는 수학적 연산 화면입니다.</p>
+    
+    <div class="grid">
+        <div class="card">
+            <h3>👖 1차원: 하의 선택 (보유량)</h3>
+            <div class="btn-group" id="pants-group">
+                <button class="active" onclick="toggleBtn(this, 'pants', 4)">기본 4종 (블랙/연청/진청/베이지)</button>
+                <button onclick="toggleBtn(this, 'pants', 5)">+ 여름 린넨 추가 (5종)</button>
+                <button onclick="toggleBtn(this, 'pants', 6)">+ 겨울 코듀로이 추가 (6종)</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>👕 2차원: 상의 선택 (두께/타입)</h3>
+            <div class="btn-group" id="tops-group">
+                <button class="active" onclick="toggleBtn(this, 'tops', 4)">봄/가을 4종만 반영</button>
+                <button onclick="toggleBtn(this, 'tops', 8)">+ 여름 반팔 무지/프린팅 (8종)</button>
+                <button onclick="toggleBtn(this, 'tops', 12)">+ 겨울 니트류 포함 (12종)</button>
+                <button onclick="toggleBtn(this, 'tops', 16)">전 시즌 상의 풀가동 (16종)</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>🧥 3차원: 아우터 축 (곱연산)</h3>
+            <div class="btn-group" id="outer-group">
+                <button class="active" onclick="toggleBtn(this, 'outer', 1)">아우터 없음 (여름 상태)</button>
+                <button onclick="toggleBtn(this, 'outer', 2)">자켓만 보유 (2배수)</button>
+                <button onclick="toggleBtn(this, 'outer', 4)">자켓/패딩/코트 풀보유 (4배수)</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>🎽 4차원: 레이어드 노출 축</h3>
+            <div class="btn-group" id="layer-group">
+                <button class="active" onclick="toggleBtn(this, 'layer', 1)">레이어드 안함 (1배수)</button>
+                <button onclick="toggleBtn(this, 'layer', 2)">흰 티 밑단 레이어드 연산 활성화 (2배수)</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="result-box">
+        <h2>수학적으로 계산된 현재 코디 경우의 수</h2>
+        <div class="result-val" id="total-cases">16 가지</div>
+        <div class="matrix-info" id="formula-display">연산식: 하의(4) × 상의(4) × 아우터(1) × 레이어드(1) = 16</div>
+        <p id="status-msg" style="margin-top:15px; font-weight:bold; color:#48bb78;">⚠️ 봄/가을/겨울을 다 채우기엔 조합이 부족합니다!</p>
+    </div>
+</div>
+
+<script>
+    // 초기 변수 설정
+    let pants = 4;
+    let tops = 4;
+    let outer = 1;
+    let layer = 1;
+
+    function toggleBtn(btn, type, value) {
+        // 해당 그룹의 모든 버튼 비활성화
+        const buttons = btn.parentElement.querySelectorAll('button');
+        buttons.forEach(b => b.classList.remove('active'));
+        
+        // 클릭한 버튼 활성화 및 값 변경
+        btn.classList.add('active');
+        
+        if(type === 'pants') pants = value;
+        if(type === 'tops') tops = value;
+        if(type === 'outer') outer = value;
+        if(type === 'layer') layer = value;
+        
+        // 결과 업데이트 연산
+        updateCalculations();
+    }
+
+    function updateCalculations() {
+        // 핵심 텐서 곱연산
+        const total = pants * tops * outer * layer;
+        
+        // 화면 출력
+        document.getElementById('total-cases').innerText = total + " 가지 코디 가능";
+        document.getElementById('formula-display').innerText = `연산식: 하의(${pants}) × 상의(${tops}) × 아우터(${outer}) × 레이어드(${layer}) = ${total}`;
+        
+        // 상태 텍스트 분기 (제약 조건 검증 시뮬레이션)
+        const msgBox = document.getElementById('status-msg');
+        if (total < 90) {
+            msgBox.innerText = "⚠️ 한 계절(최소 90일)도 제대로 버티지 못하는 위험 구간입니다! 옷을 더 확장하세요.";
+            msgBox.style.color = "#fc8181";
+        } else if (total >= 90 && total < 183) {
+            msgBox.innerText = "⚡ 여름/겨울 단일 시즌은 방어가 되지만, 1년 365일을 채우기엔 턱없이 부족합니다.";
+            msgBox.style.color = "#f6e05e";
+        } else if (total >= 183 && total < 365) {
+            msgBox.innerText = "✨ 좋습니다! 겹쳐 입기와 차원 확장을 통해 특정 계절 라인을 완벽히 커버하기 시작했습니다.";
+            msgBox.style.color = "#63b3ed";
+        } else {
+            msgBox.innerText = "🎉 미션 성공! 최소한의 정예 옷(26벌 정점)으로 365일 내내 중복 없이 예쁘게 입을 수 있는 우주 최적해에 도달했습니다!";
+            msgBox.style.color = "#48bb78";
+        }
+    }
+</script>
+</body>
+</html>
+어때
